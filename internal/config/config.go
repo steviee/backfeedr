@@ -9,6 +9,7 @@ import (
 // Config holds all application configuration
 type Config struct {
 	Port          string
+	BindAddr      string
 	DBPath        string
 	AuthToken     string
 	BaseURL       string
@@ -21,12 +22,22 @@ type Config struct {
 func Load() *Config {
 	cfg := &Config{
 		Port:          getEnv("BACKFEEDR_PORT", "8080"),
+		BindAddr:      getEnv("BACKFEEDR_BIND_ADDR", ""),
 		DBPath:        getEnv("BACKFEEDR_DB_PATH", "./data/backfeedr.db"),
 		AuthToken:     getEnv("BACKFEEDR_AUTH_TOKEN", generateToken()),
 		BaseURL:       getEnv("BACKFEEDR_BASE_URL", "http://localhost:8080"),
 		RetentionDays: getEnvInt("BACKFEEDR_RETENTION_DAYS", 90),
 		MaxBodySize:   getEnvInt64("BACKFEEDR_MAX_BODY_SIZE", 1*1024*1024), // 1MB
 		RateLimit:     getEnvInt("BACKFEEDR_RATE_LIMIT", 100),
+	}
+
+	// Set default bind address based on BaseURL
+	if cfg.BindAddr == "" {
+		if cfg.BaseURL == "http://localhost:"+cfg.Port {
+			cfg.BindAddr = "127.0.0.1"
+		} else {
+			cfg.BindAddr = "0.0.0.0"
+		}
 	}
 
 	// Ensure data directory exists

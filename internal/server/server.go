@@ -93,7 +93,14 @@ func New(cfg *config.Config, db *store.DB) *Server {
 
 // Start begins listening for requests
 func (s *Server) Start() error {
-	fmt.Printf("Server starting on port %s\n", s.cfg.Port)
+	addr := s.cfg.BindAddr + ":" + s.cfg.Port
+	s.srv.Addr = addr
+
+	// Print startup message with clickable URLs
+	fmt.Printf("\n🚀 backfeedr server starting...\n")
+	fmt.Printf("   Local:    http://localhost:%s\n", s.cfg.Port)
+	fmt.Printf("   Network:  http://%s\n\n", addr)
+
 	return s.srv.ListenAndServe()
 }
 
