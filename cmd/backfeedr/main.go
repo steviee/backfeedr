@@ -25,10 +25,14 @@ func main() {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
-	// Start background worker
+	// Start background workers
 	metricsWorker := worker.NewMetricsWorker(db)
 	metricsWorker.Start()
 	defer metricsWorker.Stop()
+	
+	retentionWorker := worker.NewRetentionWorker(db, cfg)
+	retentionWorker.Start()
+	defer retentionWorker.Stop()
 
 	srv := server.New(cfg, db)
 

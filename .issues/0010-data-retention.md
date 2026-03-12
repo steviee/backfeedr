@@ -1,7 +1,7 @@
 ---
 id: 10
 title: Implement data retention policy
-status: open
+status: closed
 priority: medium
 labels: [db, infra]
 created: 2026-03-12
