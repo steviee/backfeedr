@@ -1,7 +1,7 @@
 ---
 id: 17
 title: Build reference test client in Go
-status: open
+status: closed
 priority: high
 labels: [api, testing, sdk]
 created: 2026-03-12

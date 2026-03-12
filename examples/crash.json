@@ -1,0 +1,26 @@
+{
+  "exception_type": "EXC_BAD_ACCESS",
+  "exception_reason": "Attempted to dereference null pointer",
+  "stack_trace": [
+    {
+      "frame": 0,
+      "symbol": "ContentView.body.getter",
+      "file": "ContentView.swift",
+      "line": 42
+    },
+    {
+      "frame": 1,
+      "symbol": "SwiftUI.View.update"
+    }
+  ],
+  "app_version": "1.2.0",
+  "build_number": "47",
+  "os_version": "18.3.1",
+  "device_model": "iPhone16,1",
+  "device_id_hash": "a9f3c721...",
+  "locale": "de_DE",
+  "free_memory_mb": 312,
+  "battery_level": 0.67,
+  "is_charging": false,
+  "occurred_at": "2026-03-12T14:22:31Z"
+}
