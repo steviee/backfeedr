@@ -1,4 +1,4 @@
-.PHONY: build build-client install test clean dev docker run
+.PHONY: build build-client install test clean dev dev-client docker run
 
 BINARY_NAME=backfeedr
 CLIENT_NAME=backfeedr-client
@@ -14,10 +14,9 @@ build-client:
 
 build-all: build build-client
 
-install: build
+install: build build-client
 	cp $(BINARY_NAME) $(INSTALL_PATH)/$(BINARY_NAME)
-
-cp $(CLIENT_NAME) $(INSTALL_PATH)/$(CLIENT_NAME)
+	cp $(CLIENT_NAME) $(INSTALL_PATH)/$(CLIENT_NAME)
 
 test:
 	go test -v ./...
