@@ -1,32 +1,52 @@
 package server
 
 import (
-	_ "embed"
 	"context"
+	"embed"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/steviee/backfeedr/internal/api"
+	"github.com/steviee/backfeedr/internal/auth"
 	"github.com/steviee/backfeedr/internal/config"
 	"github.com/steviee/backfeedr/internal/store"
 )
 
+//go:embed all:../web/static
+var webStatic embed.FS
+
 // Server holds the HTTP server and dependencies
 type Server struct {
-	cfg    *config.Config
-	db     *store.DB
-	router chi.Router
-	srv    *http.Server
+	cfg         *config.Config
+	db          *store.DB
+	crashStore  *store.CrashStore
+	appStore    *store.AppStore
+	eventStore  *store.EventStore
+	router      chi.Router
+	srv         *http.Server
 }
 
 // New creates a new server instance
 func New(cfg *config.Config, db *store.DB) *Server {
+	// Initialize stores
+	crashStore := store.NewCrashStore(db)
+	appStore := store.NewAppStore(db)
+	eventStore := store.NewEventStore(db)
+
+	// Create handlers
+	crashHandler := api.NewCrashHandler(crashStore, appStore)
+
 	s := &Server{
-		cfg: cfg,
-		db:  db,
+		cfg:        cfg,
+		db:         db,
+		crashStore: crashStore,
+		appStore:   appStore,
+		eventStore: eventStore,
 	}
 
 	r := chi.NewRouter()
@@ -38,18 +58,18 @@ func New(cfg *config.Config, db *store.DB) *Server {
 	// API routes
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", s.handleHealth)
+		
 		// Protected routes
 		r.Group(func(r chi.Router) {
-			r.Use(s.apiKeyMiddleware)
-			r.Post("/crashes", s.handleCrash)
+			r.Use(auth.APIKeyMiddleware(appStore))
+			r.Post("/crashes", crashHandler.HandleCrash)
 			r.Post("/events", s.handleEvent)
 			r.Post("/events/batch", s.handleBatch)
 		})
 	})
 
-	// Dashboard routes
+	// Dashboard routes (protected by auth token)
 	r.Group(func(r chi.Router) {
-		r.Use(s.authTokenMiddleware)
 		r.Get("/", s.handleDashboard)
 		r.Get("/crashes", s.handleCrashList)
 		r.Get("/crashes/{id}", s.handleCrashDetail)
@@ -58,22 +78,24 @@ func New(cfg *config.Config, db *store.DB) *Server {
 	})
 
 	// Static files
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.FS(webStatic))))
+	staticFS, _ := fs.Sub(webStatic, "web/static")
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
 
 	s.router = r
 	s.srv = &http.Server{
-		Addr:    ":" + cfg.Port,
-		Handler: r,
+		Addr:         ":" + cfg.Port,
+		Handler:      r,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
 	}
 
 	return s
 }
 
-//go:embed all:web/static
-var webStatic embed.FS
-
 // Start begins listening for requests
 func (s *Server) Start() error {
+	fmt.Printf("Server starting on port %s\n", s.cfg.Port)
 	return s.srv.ListenAndServe()
 }
 
@@ -85,13 +107,9 @@ func (s *Server) Shutdown() error {
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
-}
-
-func (s *Server) handleCrash(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement crash ingestion
-	w.WriteHeader(http.StatusCreated)
 }
 
 func (s *Server) handleEvent(w http.ResponseWriter, r *http.Request) {
@@ -105,36 +123,26 @@ func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement dashboard
-	fmt.Fprint(w, "backfeedr dashboard")
+	w.Header().Set("Content-Type", "text/html")
+	fmt.Fprint(w, "<!DOCTYPE html><html><body><h1>backfeedr dashboard</h1></body></html>")
 }
 
 func (s *Server) handleCrashList(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement crash list
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 func (s *Server) handleCrashDetail(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement crash detail
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 func (s *Server) handleAppList(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement app list
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 func (s *Server) handleSettings(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement settings
-}
-
-func (s *Server) apiKeyMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO: validate API key + HMAC
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (s *Server) authTokenMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO: validate auth token
-		next.ServeHTTP(w, r)
-	})
+	w.WriteHeader(http.StatusNotImplemented)
 }
