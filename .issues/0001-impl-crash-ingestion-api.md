@@ -1,7 +1,7 @@
 ---
 id: 1
 title: Implement crash ingestion API endpoint
-status: open
+status: in-progress
 priority: critical
 labels: [api]
 created: 2026-03-12
