@@ -1,89 +1,75 @@
 {{template "layout" .}}
 
-{{define "title"}}Dashboard<:title>{{end}}
+{{define "title"}}Dashboard{{end}}
 
 {{define "content"}}
-<div hx-get="/api/overview" hx-trigger="load, every 30s">
-    <div class="stats-grid">
-        {{range .Stats}}
-        <article class="stat-card">
-            <div class="stat-label">{{.Label}}</div>
-            <div class="stat-value {{.Class}}">{{.Value}}</div>
-            {{if .Change}}
-            <div class="stat-change {{.ChangeClass}}">{{.Change}}</div>
+<div class="stats-grid">
+    {{range .Stats}}
+    <article class="stat-card">
+        <div class="stat-label">{{.Label}}</div>
+        <div class="stat-value {{.Class}}">{{.Value}}</div>
+    </article>
+    {{end}}
+</div>
+
+<!-- Crash List -->
+<section>
+    <h2>Recent Crashes</h2>
+    {{if .Crashes}}
+    <table role="grid">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>App Version</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Crashes}}
+            <tr>
+                <td><code>{{.ExceptionType}}</code></td>
+                <td>{{.ExceptionReason}}</td>
+                <td>{{.AppVersion}}</td>
+                <td>{{.OccurredAt.Format "2006-01-02 15:04"}}</td>
+            </tr>
             {{end}}
-            {{if .ChartData}}
-            <div class="chart-container">
-                <canvas id="chart-{{.ID}}"></canvas>
-            </div>
+        </tbody>
+    </table>
+    {{else}}
+    <p>No crashes recorded yet. Send some data from your app!</p>
+    {{end}}
+</section>
+
+<!-- Crash Groups -->
+{{if .Groups}}
+<section>
+    <h2>Crash Groups</h2>
+    <table role="grid">
+        <thead>
+            <tr>
+                <th>Exception Type</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Groups}}
+            <tr>
+                <td><code>{{.ExceptionType}}</code></td>
+                <td>{{.Count}}</td>
+            </tr>
             {{end}}
-        </article>
-        {{else}}
-        <!-- Default stats when no data -->
-        <article class="stat-card">
-            <div class="stat-label">Crash-Free Rate (7d)</div>
-            <div class="stat-value" id="crash-free-rate">--%</div>
-            <div class="chart-container">
-                <canvas id="crash-free-chart"></canvas>
-            </div>
-        </article>
-        
-        <article class="stat-card">
-            <div class="stat-label">Active Users (DAU)</div>
-            <div class="stat-value" id="dau">--</div>
-        </article>
-        
-        <article class="stat-card">
-            <div class="stat-label">Sessions (7d)</div>
-            <div class="stat-value" id="sessions-7d">--</div>
-        </article>
-        
-        <article class="stat-card">
-            <div class="stat-label">Crashes (7d)</div>
-            <div class="stat-value" id="crashes-7d">--</div>
-        </article>
-        {{end}}
-    </div>
+        </tbody>
+    </table>
+</section>
+{{end}}
 {{end}}
 
 {{define "scripts"}}
 <script>
-    // Sparkline charts loaded dynamically via HTMX
-    document.body.addEventListener('htmx:afterSwap', function(evt) {
-        // Re-initialize charts after content swap
-        initCharts();
-    });
-    
-    function initCharts() {
-        const ctx = document.getElementById('crash-free-chart');
-        if (ctx && !ctx.chart) {
-            ctx.chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['1', '2', '3', '4', '5', '6', '7'],
-                    datasets: [{
-                        data: [98, 97, 99, 98, 96, 97, 98],
-                        borderColor: 'rgb(0, 200, 83)',
-                        backgroundColor: 'rgba(0, 200, 83, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false },
-                        y: { display: false, min: 90, max: 100 }
-                    }
-                }
-            });
-        }
-    }
-    
-    // Initial chart load
-    document.addEventListener('DOMContentLoaded', initCharts);
+    // Auto-refresh every 30 seconds
+    setTimeout(function() {
+        window.location.reload();
+    }, 30000);
 </script>
 {{end}}

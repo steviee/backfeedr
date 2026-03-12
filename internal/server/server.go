@@ -40,6 +40,7 @@ func New(cfg *config.Config, db *store.DB) *Server {
 	// Create handlers
 	crashHandler := api.NewCrashHandler(crashStore, appStore)
 	eventHandler := api.NewEventHandler(eventStore, appStore)
+	dashAPIHandler := api.NewDashboardHandler(crashStore, appStore)
 	dashHandler, err := dashboard.NewHandler(crashStore, appStore, nil)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to create dashboard handler: %v", err))
@@ -62,6 +63,7 @@ func New(cfg *config.Config, db *store.DB) *Server {
 	// API routes
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", s.handleHealth)
+		r.Get("/overview", dashAPIHandler.GetOverview)
 
 		// Protected routes
 		r.Group(func(r chi.Router) {

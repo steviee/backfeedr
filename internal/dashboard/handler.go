@@ -44,38 +44,40 @@ func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 		"AppName": "backfeedr",
 	}
 
-	// Load real data if available
-	if ctx := r.Context(); ctx != nil {
-		// TODO: Load actual metrics
-		data["Stats"] = []StatCard{
-			{
-				Label:       "Crash-Free Rate (7d)",
-				Value:       "98.5%",
-				Class:       "",
-				Change:      "+1.2%",
-				ChangeClass: "positive",
-			},
-			{
-				Label:       "Active Users (DAU)",
-				Value:       "1,234",
-				Class:       "",
-				Change:      "+56",
-				ChangeClass: "positive",
-			},
-			{
-				Label: "Sessions (7d)",
-				Value: "12,456",
-				Class: "",
-			},
-			{
-				Label:       "Crashes (7d)",
-				Value:       "23",
-				Class:       "text-red-500",
-				Change:      "-5",
-				ChangeClass: "positive",
-			},
-		}
+	// Load real data
+	ctx := r.Context()
+
+	// Get total crashes
+	crashes, _ := h.crashStore.List(ctx, "", 100)
+	crashCount := len(crashes)
+
+	// Get apps
+	apps, _ := h.appStore.List(ctx)
+	appCount := len(apps)
+
+	// Get crash groups
+	groups, _ := h.crashStore.GetGroups(ctx, "")
+	groupCount := len(groups)
+
+	data["Stats"] = []StatCard{
+		{
+			Label: "Total Crashes",
+			Value: fmt.Sprintf("%d", crashCount),
+			Class: "",
+		},
+		{
+			Label: "Connected Apps",
+			Value: fmt.Sprintf("%d", appCount),
+			Class: "",
+		},
+		{
+			Label: "Crash Groups",
+			Value: fmt.Sprintf("%d", groupCount),
+			Class: "",
+		},
 	}
+	data["Crashes"] = crashes
+	data["Groups"] = groups
 
 	if err := h.templates.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
