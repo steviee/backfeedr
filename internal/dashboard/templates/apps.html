@@ -1,0 +1,100 @@
+{{define "content"}}
+<article>
+    <header>
+        <h2>Apps</h2>
+        <button onclick="document.getElementById('create-modal').showModal()">
+            + New App
+        </button>
+    </header>
+    
+    <!-- App List -->
+    <div id="app-list" hx-get="/api/apps" hx-trigger="load">
+        <!-- Loaded via HTMX -->
+    </div>
+</article>
+
+{{template "create-modal" .}}
+{{template "key-modal" .}}
+
+{{end}}
+
+{{define "create-modal"}}
+<dialog id="create-modal">
+    <article>
+        <header>
+            <h3>Create New App</h3>
+            <button aria-label="Close" 
+                    onclick="document.getElementById('create-modal').close()">></button>
+        </header>
+        
+        <form hx-post="/api/apps" 
+              hx-target="#app-list" 
+              hx-swap="innerHTML"
+              onsubmit="document.getElementById('create-modal').close()">
+            <label>
+                App Name
+                <input type="text" name="name" placeholder="MyApp" required>
+            </label>
+            
+            <label>
+                Bundle ID
+                <input type="text" name="bundle_id" placeholder="com.example.myapp" required>
+            </label>
+            
+            <footer>
+                <button type="button" 
+                        class="secondary" 
+                        onclick="document.getElementById('create-modal').close()">
+                    Cancel
+                </button>
+                <button type="submit">Create App</button>
+            </footer>
+        </form>
+    </article>
+</dialog>
+{{end}}
+
+{{define "key-modal"}}
+<dialog id="key-modal">
+    <article>
+        <header>
+            <h3>⚠️ API Key</h3>
+        </header>
+        
+        <p>Copy this API key now. You won't be able to see it again!</p>
+        
+        <pre><code id="api-key-display"></code></pre>
+        
+        <footer>
+            <button onclick="copyKey()">Copy to Clipboard</button>
+            <button class="secondary"
+                    onclick="document.getElementById('key-modal').close()">
+                Close
+            </button>
+        </footer>
+    </article>
+</dialog>
+{{end}}
+
+{{define "scripts"}}
+<script>
+    function showKey(key) {
+        document.getElementById('api-key-display').textContent = key;
+        document.getElementById('key-modal').showModal();
+    }
+    
+    function copyKey() {
+        const key = document.getElementById('api-key-display').textContent;
+        navigator.clipboard.writeText(key).then(() => {
+            alert('Copied to clipboard!');
+        });
+    }
+    
+    function confirmDelete(appId, appName) {
+        if (confirm(`Delete "${appName}"? This cannot be undone.`)) {
+            fetch(`/api/apps/${appId}`, { method: 'DELETE' })
+                .then(() => window.location.reload());
+        }
+    }
+</script>
+{{end}}
