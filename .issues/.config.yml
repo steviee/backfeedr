@@ -1,0 +1,10 @@
+default_priority: medium
+auto_stage: true
+labels:
+  - api
+  - auth
+  - dashboard
+  - db
+  - sdk
+  - security
+  - infra
