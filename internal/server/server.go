@@ -20,13 +20,13 @@ import (
 
 // Server holds the HTTP server and dependencies
 type Server struct {
-	cfg         *config.Config
-	db          *store.DB
-	crashStore  *store.CrashStore
-	appStore    *store.AppStore
-	eventStore  *store.EventStore
-	router      chi.Router
-	srv         *http.Server
+	cfg        *config.Config
+	db         *store.DB
+	crashStore *store.CrashStore
+	appStore   *store.AppStore
+	eventStore *store.EventStore
+	router     chi.Router
+	srv        *http.Server
 }
 
 // New creates a new server instance
@@ -57,7 +57,7 @@ func New(cfg *config.Config, db *store.DB) *Server {
 	// API routes
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", s.handleHealth)
-		
+
 		// Protected routes
 		r.Group(func(r chi.Router) {
 			r.Use(auth.APIKeyMiddleware(appStore))

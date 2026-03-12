@@ -104,20 +104,20 @@ func (h *CrashHandler) HandleCrash(w http.ResponseWriter, r *http.Request) {
 
 // CrashRequest represents the incoming crash payload
 type CrashRequest struct {
-	ExceptionType   string                `json:"exception_type"`
-	ExceptionReason string                `json:"exception_reason"`
-	StackTrace      []models.StackFrame   `json:"stack_trace"`
-	AppVersion      string                `json:"app_version"`
-	BuildNumber     string                `json:"build_number"`
-	OSVersion       string                `json:"os_version"`
-	DeviceModel     string                `json:"device_model"`
-	DeviceIDHash    string                `json:"device_id_hash"`
-	Locale          string                `json:"locale"`
-	FreeMemoryMB    int                   `json:"free_memory_mb"`
-	FreeDiskMB      int                   `json:"free_disk_mb"`
-	BatteryLevel    float64               `json:"battery_level"`
-	IsCharging      bool                  `json:"is_charging"`
-	OccurredAt      time.Time             `json:"occurred_at"`
+	ExceptionType   string              `json:"exception_type"`
+	ExceptionReason string              `json:"exception_reason"`
+	StackTrace      []models.StackFrame `json:"stack_trace"`
+	AppVersion      string              `json:"app_version"`
+	BuildNumber     string              `json:"build_number"`
+	OSVersion       string              `json:"os_version"`
+	DeviceModel     string              `json:"device_model"`
+	DeviceIDHash    string              `json:"device_id_hash"`
+	Locale          string              `json:"locale"`
+	FreeMemoryMB    int                 `json:"free_memory_mb"`
+	FreeDiskMB      int                 `json:"free_disk_mb"`
+	BatteryLevel    float64             `json:"battery_level"`
+	IsCharging      bool                `json:"is_charging"`
+	OccurredAt      time.Time           `json:"occurred_at"`
 }
 
 // CrashResponse represents the API response

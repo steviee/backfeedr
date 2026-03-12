@@ -1,9 +1,9 @@
 // Package client provides a reference implementation for the backfeedr API.
 //
 // This package serves three purposes:
-//   1. Living documentation - Shows how to use the API
-//   2. Reference implementation - Basis for SDKs in other languages
-//   3. Testing tool - Can be used in CI for integration tests
+//  1. Living documentation - Shows how to use the API
+//  2. Reference implementation - Basis for SDKs in other languages
+//  3. Testing tool - Can be used in CI for integration tests
 //
 // Basic usage:
 //
@@ -17,5 +17,4 @@
 //	    ...
 //	}
 //	resp, err := c.SendCrash(crash)
-//
 package client

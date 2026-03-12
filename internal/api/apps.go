@@ -60,10 +60,10 @@ func (h *AppHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"id":       app.ID,
-		"name":     app.Name,
-		"bundle_id": app.BundleID,
-		"api_key":  app.APIKey,
+		"id":         app.ID,
+		"name":       app.Name,
+		"bundle_id":  app.BundleID,
+		"api_key":    app.APIKey,
 		"created_at": app.CreatedAt,
 	})
 }

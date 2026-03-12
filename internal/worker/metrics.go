@@ -12,9 +12,9 @@ import (
 
 // MetricsWorker aggregates events into daily metrics
 type MetricsWorker struct {
-	store      *store.DB
-	interval   time.Duration
-	stopChan   chan struct{}
+	store    *store.DB
+	interval time.Duration
+	stopChan chan struct{}
 }
 
 // NewMetricsWorker creates a new metrics aggregation worker
@@ -29,10 +29,10 @@ func NewMetricsWorker(db *store.DB) *MetricsWorker {
 // Start begins the background aggregation
 func (w *MetricsWorker) Start() {
 	log.Println("[worker] Starting metrics aggregation worker")
-	
+
 	// Run immediately on start, then at interval
 	w.runAggregation()
-	
+
 	ticker := time.NewTicker(w.interval)
 	go func() {
 		for {
@@ -56,21 +56,21 @@ func (w *MetricsWorker) Stop() {
 func (w *MetricsWorker) runAggregation() {
 	ctx := context.Background()
 	yesterday := time.Now().UTC().AddDate(0, 0, -1).Truncate(24 * time.Hour)
-	
+
 	log.Printf("[worker] Running aggregation for %s", yesterday.Format("2006-01-02"))
-	
+
 	if err := w.aggregateSessions(ctx, yesterday); err != nil {
 		log.Printf("[worker] Error aggregating sessions: %v", err)
 	}
-	
+
 	if err := w.aggregateCrashes(ctx, yesterday); err != nil {
 		log.Printf("[worker] Error aggregating crashes: %v", err)
 	}
-	
+
 	if err := w.calculateAvgSessionDuration(ctx, yesterday); err != nil {
 		log.Printf("[worker] Error calculating session duration: %v", err)
 	}
-	
+
 	log.Printf("[worker] Aggregation complete for %s", yesterday.Format("2006-01-02"))
 }
 
@@ -92,7 +92,7 @@ func (w *MetricsWorker) aggregateSessions(ctx context.Context, date time.Time) e
 			unique_devices = excluded.unique_devices,
 			updated_at = CURRENT_TIMESTAMP
 	`
-	
+
 	_, err := w.store.ExecContext(ctx, query, date.Format("2006-01-02"))
 	if err != nil {
 		return fmt.Errorf("aggregate sessions: %w", err)
@@ -115,7 +115,7 @@ func (w *MetricsWorker) aggregateCrashes(ctx context.Context, date time.Time) er
 			crashes = excluded.crashes,
 			updated_at = CURRENT_TIMESTAMP
 	`
-	
+
 	_, err := w.store.ExecContext(ctx, query, date.Format("2006-01-02"))
 	if err != nil {
 		return fmt.Errorf("aggregate crashes: %w", err)
@@ -148,7 +148,7 @@ func (w *MetricsWorker) calculateAvgSessionDuration(ctx context.Context, date ti
 			avg_session_sec = excluded.avg_session_sec,
 			updated_at = CURRENT_TIMESTAMP
 	`
-	
+
 	_, err := w.store.ExecContext(ctx, query, date.Format("2006-01-02"))
 	if err != nil {
 		return fmt.Errorf("calculate avg session duration: %w", err)
@@ -159,31 +159,31 @@ func (w *MetricsWorker) calculateAvgSessionDuration(ctx context.Context, date ti
 // AggregateDate manually triggers aggregation for a specific date
 func (w *MetricsWorker) AggregateDate(ctx context.Context, date time.Time) error {
 	log.Printf("[worker] Manual aggregation for %s", date.Format("2006-01-02"))
-	
+
 	if err := w.aggregateSessions(ctx, date); err != nil {
 		return err
 	}
-	
+
 	if err := w.aggregateCrashes(ctx, date); err != nil {
 		return err
 	}
-	
+
 	if err := w.calculateAvgSessionDuration(ctx, date); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 // AggregateDateRange aggregates metrics for a date range (backfill)
 func (w *MetricsWorker) AggregateDateRange(ctx context.Context, start, end time.Time) error {
 	log.Printf("[worker] Backfilling from %s to %s", start.Format("2006-01-02"), end.Format("2006-01-02"))
-	
+
 	for d := start; !d.After(end); d = d.AddDate(0, 0, 1) {
 		if err := w.AggregateDate(ctx, d); err != nil {
 			return fmt.Errorf("aggregate %s: %w", d.Format("2006-01-02"), err)
 		}
 	}
-	
+
 	return nil
 }

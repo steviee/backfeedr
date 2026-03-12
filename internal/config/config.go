@@ -7,13 +7,13 @@ import (
 
 // Config holds all application configuration
 type Config struct {
-	Port           string
-	DBPath         string
-	AuthToken      string
-	BaseURL        string
-	RetentionDays  int
-	MaxBodySize    int64
-	RateLimit      int
+	Port          string
+	DBPath        string
+	AuthToken     string
+	BaseURL       string
+	RetentionDays int
+	MaxBodySize   int64
+	RateLimit     int
 }
 
 // Load reads configuration from environment variables

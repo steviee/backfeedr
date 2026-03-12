@@ -15,10 +15,10 @@ var templateFS embed.FS
 
 // Handler handles dashboard requests
 type Handler struct {
-	crashStore  *store.CrashStore
-	appStore    *store.AppStore
+	crashStore   *store.CrashStore
+	appStore     *store.AppStore
 	metricsStore *store.MetricsStore
-	templates   *template.Template
+	templates    *template.Template
 }
 
 // NewHandler creates a new dashboard handler
@@ -30,10 +30,10 @@ func NewHandler(crashStore *store.CrashStore, appStore *store.AppStore, metricsS
 	}
 
 	return &Handler{
-		crashStore:  crashStore,
-		appStore:    appStore,
+		crashStore:   crashStore,
+		appStore:     appStore,
 		metricsStore: metricsStore,
-		templates:   tmpl,
+		templates:    tmpl,
 	}, nil
 }
 
@@ -49,17 +49,17 @@ func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 		// TODO: Load actual metrics
 		data["Stats"] = []StatCard{
 			{
-				Label: "Crash-Free Rate (7d)",
-				Value: "98.5%",
-				Class: "",
-				Change: "+1.2%",
+				Label:       "Crash-Free Rate (7d)",
+				Value:       "98.5%",
+				Class:       "",
+				Change:      "+1.2%",
 				ChangeClass: "positive",
 			},
 			{
-				Label: "Active Users (DAU)",
-				Value: "1,234",
-				Class: "",
-				Change: "+56",
+				Label:       "Active Users (DAU)",
+				Value:       "1,234",
+				Class:       "",
+				Change:      "+56",
 				ChangeClass: "positive",
 			},
 			{
@@ -68,10 +68,10 @@ func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 				Class: "",
 			},
 			{
-				Label: "Crashes (7d)",
-				Value: "23",
-				Class: "text-red-500",
-				Change: "-5",
+				Label:       "Crashes (7d)",
+				Value:       "23",
+				Class:       "text-red-500",
+				Change:      "-5",
 				ChangeClass: "positive",
 			},
 		}
@@ -147,7 +147,7 @@ func (h *Handler) Settings(w http.ResponseWriter, r *http.Request) {
 // APIOverview returns overview data for HTMX updates
 func (h *Handler) APIOverview(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	
+
 	// Return updated stats HTML
 	fmt.Fprintf(w, `
 		<div class="stats-grid" hx-swap-oob="true">

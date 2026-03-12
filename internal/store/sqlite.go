@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS events (
     app_version TEXT,
     os_version TEXT,
     device_model TEXT,
+    device_id_hash TEXT,
     session_id TEXT,
     occurred_at DATETIME,
     received_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -93,6 +94,7 @@ CREATE TABLE IF NOT EXISTS daily_metrics (
     crashes INTEGER DEFAULT 0,
     errors INTEGER DEFAULT 0,
     avg_session_sec REAL DEFAULT 0,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (app_id, date)
 );
 `

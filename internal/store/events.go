@@ -21,7 +21,7 @@ func NewEventStore(db *DB) *EventStore {
 // Create inserts a new event
 func (s *EventStore) Create(ctx context.Context, event *models.Event) error {
 	propsJSON, _ := json.Marshal(event.Properties)
-	
+
 	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO events (
 			id, app_id, type, name, properties, app_version,

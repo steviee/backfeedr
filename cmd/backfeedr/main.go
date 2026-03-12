@@ -29,7 +29,7 @@ func main() {
 	metricsWorker := worker.NewMetricsWorker(db)
 	metricsWorker.Start()
 	defer metricsWorker.Stop()
-	
+
 	retentionWorker := worker.NewRetentionWorker(db, cfg)
 	retentionWorker.Start()
 	defer retentionWorker.Stop()

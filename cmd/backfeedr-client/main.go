@@ -1,8 +1,9 @@
 // backfeedr-client - Reference test client for backfeedr API
 //
 // Usage:
-//   backfeedr-client --endpoint https://crashes.example.com --api-key bf_live_... --command send-crash --file crash.json
-//   backfeedr-client --endpoint https://crashes.example.com --api-key bf_live_... --command send-event --type session_start
+//
+//	backfeedr-client --endpoint https://crashes.example.com --api-key bf_live_... --command send-crash --file crash.json
+//	backfeedr-client --endpoint https://crashes.example.com --api-key bf_live_... --command send-event --type session_start
 //
 // This client serves as:
 //   - Living API documentation
@@ -21,12 +22,12 @@ import (
 )
 
 type Config struct {
-	Endpoint string
-	APIKey   string
-	Command  string
-	File     string
+	Endpoint  string
+	APIKey    string
+	Command   string
+	File      string
 	EventType string
-	Debug    bool
+	Debug     bool
 }
 
 func main() {
