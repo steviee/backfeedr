@@ -1,7 +1,7 @@
 ---
 id: 2
 title: Implement event ingestion API
-status: in-progress
+status: closed
 priority: critical
 labels: [api]
 created: 2026-03-12
