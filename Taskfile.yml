@@ -1,0 +1,84 @@
+# Taskfile.yml - Modern alternative to Makefile (2026)
+# Install: go install github.com/go-task/task/v3/cmd/task@latest
+
+version: '3'
+
+vars:
+  BINARY_NAME: backfeedr
+  CLIENT_NAME: backfeedr-client
+
+tasks:
+  default:
+    cmds:
+      - task: build
+
+  build:
+    desc: Build all binaries
+    cmds:
+      - go build -o {{.BINARY_NAME}} ./cmd/backfeedr
+      - go build -o {{.CLIENT_NAME}} ./cmd/backfeedr-client
+
+  test:
+    desc: Run tests with race detection
+    cmds:
+      - go test -v -race ./...
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run ./...
+
+  fmt:
+    desc: Format code with gofmt
+    cmds:
+      - gofmt -s -w .
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  tidy:
+    desc: Tidy go modules
+    cmds:
+      - go mod tidy
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -f {{.BINARY_NAME}} {{.CLIENT_NAME}}
+      - go clean -cache
+
+  dev:
+    desc: Run server in dev mode
+    cmds:
+      - go run ./cmd/backfeedr
+
+  dev-client:
+    desc: Run client in dev mode
+    cmds:
+      - go run ./cmd/backfeedr-client
+
+  docker:
+    desc: Build Docker image
+    cmds:
+      - docker build -t {{.BINARY_NAME}}:latest .
+
+  ci:
+    desc: Full CI pipeline
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: test
+      - task: build
+
+  generate:
+    desc: Generate code (mocks, etc.)
+    cmds:
+      - go generate ./...
+
+  install-tools:
+    desc: Install development tools
+    cmds:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - go install github.com/go-task/task/v3/cmd/task@latest
