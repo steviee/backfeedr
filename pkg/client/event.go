@@ -15,6 +15,7 @@ type EventRequest struct {
 	OSVersion    string                 `json:"os_version"`
 	DeviceModel  string                 `json:"device_model"`
 	DeviceIDHash string                 `json:"device_id_hash"`
+	Locale       string                 `json:"locale,omitempty"`
 	SessionID    string                 `json:"session_id,omitempty"`
 	OccurredAt   time.Time              `json:"occurred_at"`
 }
