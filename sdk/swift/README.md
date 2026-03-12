@@ -2,6 +2,8 @@
 
 iOS SDK for [backfeedr](https://github.com/steviee/backfeedr) — self-hosted crash reporting.
 
+**Location:** This SDK is part of the main backfeedr repository under `sdk/swift/`.
+
 ## Installation
 
 ### Swift Package Manager
@@ -9,10 +11,19 @@ iOS SDK for [backfeedr](https://github.com/steviee/backfeedr) — self-hosted cr
 Add to your `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/steviee/backfeedr-swift.git", from: "1.0.0")
+.package(url: "https://github.com/steviee/backfeedr.git", from: "1.0.0")
 ```
 
-Or in Xcode: File → Add Package Dependencies → `https://github.com/steviee/backfeedr-swift.git`
+Or in Xcode: File → Add Package Dependencies → `https://github.com/steviee/backfeedr.git`
+
+Then add `BackfeedrKit` as a dependency to your target:
+
+```swift
+.target(
+    name: "YourApp",
+    dependencies: ["BackfeedrKit"]
+)
+```
 
 ## Setup
 

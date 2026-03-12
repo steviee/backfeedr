@@ -52,7 +52,7 @@ struct MyApp: App {
 }
 ```
 
-See [backfeedr/backfeedr-swift](https://github.com/steviee/backfeedr-swift) for the full SDK.
+See [`sdk/swift`](sdk/swift) for the full SDK.
 
 ## 🛠️ Configuration
 
