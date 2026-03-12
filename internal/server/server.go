@@ -2,9 +2,7 @@ package server
 
 import (
 	"context"
-	"embed"
 	"fmt"
-	"io/fs"
 	"net/http"
 	"time"
 
@@ -17,8 +15,8 @@ import (
 	"github.com/steviee/backfeedr/internal/store"
 )
 
-//go:embed all:../web/static
-var webStatic embed.FS
+// Static files are served from ./web/static directory
+// TODO: Use embed when static files are ready
 
 // Server holds the HTTP server and dependencies
 type Server struct {
@@ -79,8 +77,7 @@ func New(cfg *config.Config, db *store.DB) *Server {
 	})
 
 	// Static files
-	staticFS, _ := fs.Sub(webStatic, "web/static")
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
 
 	s.router = r
 	s.srv = &http.Server{

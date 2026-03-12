@@ -1,0 +1,2 @@
+-- Initial schema
+-- This is a placeholder for actual migrations

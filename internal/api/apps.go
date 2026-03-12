@@ -110,7 +110,7 @@ func (h *AppHandler) RotateKey(w http.ResponseWriter, r *http.Request) {
 
 // Delete deletes an app
 func (h *AppHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	_ = chi.URLParam(r, "id") // TODO: Use this for deletion
 
 	// TODO: Implement soft delete
 	w.WriteHeader(http.StatusNotImplemented)
