@@ -1,7 +1,7 @@
 ---
 id: 8
 title: App management UI
-status: open
+status: in-progress
 priority: medium
 labels: [dashboard]
 created: 2026-03-12
