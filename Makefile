@@ -18,6 +18,13 @@ build:
 test:
 	go test -v -race ./...
 
+# Run integration tests locally
+test-integration: build
+	./test/integration.sh
+
+# Run all tests (unit + integration)
+test-all: test test-integration
+
 # Lint with golangci-lint (standard 2026)
 lint:
 	golangci-lint run ./...
