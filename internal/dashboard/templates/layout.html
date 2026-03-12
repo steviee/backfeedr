@@ -1,0 +1,116 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{template "title" .}} | backfeedr</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --pico-font-family-sans: system-ui, -apple-system, sans-serif;
+            --pico-font-size: 1rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--pico-card-background-color);
+            border-radius: var(--pico-border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--pico-card-box-shadow);
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--pico-muted-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .stat-change {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .chart-container {
+            height: 60px;
+            margin-top: 1rem;
+        }
+        .crash-list {
+            margin-top: 2rem;
+        }
+        .crash-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid var(--pico-muted-border-color);
+        }
+        .crash-item:last-child {
+            border-bottom: none;
+        }
+        .crash-info {
+            flex: 1;
+        }
+        .crash-type {
+            font-family: var(--pico-font-family-monospace);
+            font-size: 0.875rem;
+            color: var(--pico-code-color);
+        }
+        .crash-count {
+            text-align: right;
+            min-width: 100px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--pico-border-radius);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-critical { background: var(--pico-color-red-500); }
+        .badge-high { background: var(--pico-color-orange-500); }
+        .badge-medium { background: var(--pico-color-yellow-500); color: #000; }
+        .badge-low { background: var(--pico-color-green-500); }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        [data-theme="light"] .logo-dark { display: none; }
+        [data-theme="dark"] .logo-light { display: none; }
+    </style>
+</head>
+<body>
+    <nav class="container-fluid">
+        <ul>
+            <li><span class="navbar-brand">🔥 backfeedr</span></li>
+        </ul>
+        <ul>
+            <li><a href="/" hx-boost="true">Dashboard</a></li>
+            <li><a href="/crashes" hx-boost="true">Crashes</a></li>
+            <li><a href="/apps" hx-boost="true">Apps</a></li>
+            <li><a href="/settings" hx-boost="true">Settings</a></li>
+        </ul>
+    </nav>
+    
+    <main class="container" hx-boost="true">
+        {{template "content" .}}
+    </main>
+    
+    <footer class="container">
+        <small>
+            backfeedr — <a href="https://github.com/steviee/backfeedr">GitHub</a>
+        </small>
+    </footer>
+    
+    {{template "scripts" .}}
+</body>
+</html>
+{{end}}

@@ -1,7 +1,7 @@
 ---
 id: 6
 title: Create dashboard overview page
-status: open
+status: in-progress
 priority: high
 labels: [dashboard]
 created: 2026-03-12
