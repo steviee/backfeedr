@@ -1,0 +1,29 @@
+{
+  "events": [
+    {
+      "type": "session_start",
+      "session_id": "sess_abc123",
+      "occurred_at": "2026-03-12T14:20:00Z",
+      "app_version": "1.2.0"
+    },
+    {
+      "type": "custom",
+      "name": "page_view",
+      "properties": {
+        "screen": "settings"
+      },
+      "session_id": "sess_abc123",
+      "occurred_at": "2026-03-12T14:21:00Z",
+      "app_version": "1.2.0"
+    },
+    {
+      "type": "session_end",
+      "session_id": "sess_abc123",
+      "properties": {
+        "duration": 120
+      },
+      "occurred_at": "2026-03-12T14:22:00Z",
+      "app_version": "1.2.0"
+    }
+  ]
+}
