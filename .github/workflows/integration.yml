@@ -67,7 +67,7 @@ jobs:
       run: |
         docker build -t backfeedr:test .
         docker run -d --name backfeedr-test -p 8081:8080 backfeedr:test
-        sleep 3
+        sleep 5
         curl -f http://localhost:8081/api/v1/health || exit 1
         docker stop backfeedr-test
         docker rm backfeedr-test
