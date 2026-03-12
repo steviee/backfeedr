@@ -1,7 +1,7 @@
 ---
 id: 11
 title: Create Swift SDK repository scaffold
-status: in-progress
+status: closed
 priority: critical
 labels: [sdk]
 created: 2026-03-12
