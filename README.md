@@ -75,6 +75,33 @@ We'd love your help! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 All contributions are welcome, from documentation to code.
 
+## 📅 Roadmap
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Crash ingestion API | ✅ | `POST /api/v1/crashes` |
+| Event ingestion API | ✅ | `POST /api/v1/events` + batch |
+| API key authentication | ✅ | `X-Backfeedr-Key` header |
+| HMAC request signing | ✅ | Optional, SHA-256 |
+| Web dashboard | ✅ | HTMX + Pico CSS |
+| App management | ✅ | Create, rotate keys, delete |
+| Daily metrics aggregation | ✅ | Background worker |
+| Data retention | ✅ | Auto-cleanup after 90 days |
+| iOS SDK (Swift) | ✅ | Under `sdk/swift/` |
+| Go reference client | ✅ | `cmd/backfeedr-client/` |
+| **End-to-end tests** | ✅ | `make test-integration` |
+| **Privacy Dashboard (GDPR)** | 🔄 | Issue #18 - device-specific data view |
+| Swift SDK tests | 🔄 | Unit tests |
+| SwiftUI example app | 🔄 | Demo app |
+| Email/Slack alerts | ⏳ | Webhook notifications |
+| Symbolication | ⏳ | dSYM upload & processing |
+| Multi-user accounts | ⏳ | Team access |
+| Grafana export | ⏳ | Metrics integration |
+
+**Legend:** ✅ Done | 🔄 In Progress | ⏳ Planned
+
+Check our [open issues](.issues/) for details.
+
 ## 📖 Documentation
 
 - [API Reference](docs/API.md)
