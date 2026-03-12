@@ -51,15 +51,19 @@ jobs:
         # Wait for server to start
         sleep 2
         
-        # Health check
-        ./backfeedr-client --endpoint http://localhost:8080 --command health
+        # Test API health endpoint
+        echo "Testing API health..."
+        curl -fs http://localhost:8080/api/v1/health || { echo "API health check failed"; exit 1; }
+        echo "✓ API health OK"
         
-        # Create test app
-        # Note: This would need an admin endpoint or direct DB insert
-        # For now, we just verify the server responds
+        # Test dashboard is reachable
+        echo "Testing dashboard..."
+        curl -fs http://localhost:8080/ || { echo "Dashboard unreachable"; exit 1; }
+        echo "✓ Dashboard reachable"
         
         # Stop server
         kill $SERVER_PID
+        echo "✓ All tests passed"
     
     - name: Run vet
       run: go vet ./...
