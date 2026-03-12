@@ -213,6 +213,60 @@ X-Backfeedr-Signature: sha256=a9f3c721...
 
 ---
 
+## Task Tracking with git-issues
+
+This project uses [git-issues](https://github.com/steviee/git-issues) for task management.
+Issues are stored as Markdown files in `.issues/` and version-controlled alongside code.
+
+### Current Issue List
+
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| #1 | Crash ingestion API | critical | open |
+| #2 | Event ingestion API | critical | open |
+| #3 | API key auth | critical | open |
+| #4 | HMAC signing | high | open |
+| #5 | Dashboard auth | high | open |
+| #6 | Dashboard overview | high | open |
+| #7 | Crash detail view | high | open |
+| #8 | App management | medium | open |
+| #9 | Daily metrics aggregation | medium | open |
+| #10 | Data retention | medium | open |
+| #11 | Swift SDK scaffold | critical | open |
+| #12 | Swift SDK tests | medium | open |
+| #13 | Docker optimization | medium | open |
+| #14 | Go unit tests | medium | open |
+| #15 | SwiftUI example app | low | open |
+| #16 | API documentation | medium | open |
+
+### Using git-issues
+
+```bash
+# Install git-issues
+go install github.com/steviee/git-issues/cmd/issues@latest
+
+# In repo root
+cd /root/.openclaw/workspace/backfeedr
+issues init              # Initialize (already done)
+issues new --title "..." --priority high --label api
+
+# Work on issue #1
+issues set 1 status in-progress
+# ... implement ...
+issues set 1 status closed
+```
+
+### Workflow for AI Agents
+
+1. Check current issues: `cat .issues/*.md`
+2. Pick next task by priority
+3. Update status: edit frontmatter `status: in-progress`
+4. Implement feature
+5. Update status: `status: closed`
+6. Commit with reference: `git commit -m "Implement crash ingestion API (closes #1)"`
+
+---
+
 ## Build & Run
 
 ```bash
