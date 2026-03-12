@@ -37,15 +37,40 @@ func (s *EventStore) Create(ctx context.Context, event *models.Event) error {
 	return nil
 }
 
-// CreateBatch inserts multiple events
+// CreateBatch inserts multiple events in a transaction
 func (s *EventStore) CreateBatch(ctx context.Context, events []*models.Event) error {
-	// TODO: implement batch insert
-	for _, e := range events {
-		if err := s.Create(ctx, e); err != nil {
-			return err
+	if len(events) == 0 {
+		return nil
+	}
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.PrepareContext(ctx, `
+		INSERT INTO events (
+			id, app_id, type, name, properties, app_version,
+			os_version, device_model, session_id, occurred_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	if err != nil {
+		return fmt.Errorf("prepare statement: %w", err)
+	}
+	defer stmt.Close()
+
+	for _, event := range events {
+		propsJSON, _ := json.Marshal(event.Properties)
+		if _, err := stmt.ExecContext(ctx,
+			event.ID, event.AppID, event.Type, event.Name,
+			string(propsJSON), event.AppVersion, event.OSVersion,
+			event.DeviceModel, event.SessionID, event.OccurredAt,
+		); err != nil {
+			return fmt.Errorf("insert event: %w", err)
 		}
 	}
-	return nil
+
+	return tx.Commit()
 }
 
 // List retrieves events with filtering
