@@ -12,6 +12,7 @@ import (
 	"github.com/steviee/backfeedr/internal/api"
 	"github.com/steviee/backfeedr/internal/auth"
 	"github.com/steviee/backfeedr/internal/config"
+	"github.com/steviee/backfeedr/internal/dashboard"
 	"github.com/steviee/backfeedr/internal/store"
 )
 
@@ -39,6 +40,10 @@ func New(cfg *config.Config, db *store.DB) *Server {
 	// Create handlers
 	crashHandler := api.NewCrashHandler(crashStore, appStore)
 	eventHandler := api.NewEventHandler(eventStore, appStore)
+	dashHandler, err := dashboard.NewHandler(crashStore, appStore, nil)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to create dashboard handler: %v", err))
+	}
 
 	s := &Server{
 		cfg:        cfg,
@@ -67,14 +72,12 @@ func New(cfg *config.Config, db *store.DB) *Server {
 		})
 	})
 
-	// Dashboard routes (protected by auth token)
-	r.Group(func(r chi.Router) {
-		r.Get("/", s.handleDashboard)
-		r.Get("/crashes", s.handleCrashList)
-		r.Get("/crashes/{id}", s.handleCrashDetail)
-		r.Get("/apps", s.handleAppList)
-		r.Get("/settings", s.handleSettings)
-	})
+	// Dashboard routes
+	r.Get("/", dashHandler.Index)
+	r.Get("/crashes", dashHandler.CrashList)
+	r.Get("/crashes/{id}", dashHandler.CrashDetail)
+	r.Get("/apps", dashHandler.AppList)
+	r.Get("/settings", dashHandler.Settings)
 
 	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
@@ -115,29 +118,4 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
-}
-
-func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, "<!DOCTYPE html><html><body><h1>backfeedr dashboard</h1></body></html>")
-}
-
-func (s *Server) handleCrashList(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement crash list
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (s *Server) handleCrashDetail(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement crash detail
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (s *Server) handleAppList(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement app list
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (s *Server) handleSettings(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement settings
-	w.WriteHeader(http.StatusNotImplemented)
 }
