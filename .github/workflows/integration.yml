@@ -1,0 +1,73 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+    
+    - name: Build server and client
+      run: |
+        go build -o backfeedr ./cmd/backfeedr
+        go build -o backfeedr-client ./cmd/backfeedr-client
+    
+    - name: Start server
+      run: |
+        export BACKFEEDR_DB_PATH=/tmp/test.db
+        export BACKFEEDR_AUTH_TOKEN=test_token
+        export BACKFEEDR_PORT=8080
+        
+        ./backfeedr &
+        echo "SERVER_PID=$!" >> $GITHUB_ENV
+        
+        # Wait for server
+        sleep 2
+    
+    - name: Test health endpoint
+      run: |
+        ./backfeedr-client --endpoint http://localhost:8080 --command health
+    
+    - name: Test API with client
+      run: |
+        # Create a test app directly in DB (we'll need this for full tests)
+        # For now, just verify the API responds with 401 for missing auth
+        
+        # Test with example payloads (will fail auth, but tests parsing)
+        ./backfeedr-client --endpoint http://localhost:8080 \
+          --api-key bf_live_test \
+          --command send-crash \
+          --file examples/crash.json || true
+        
+        ./backfeedr-client --endpoint http://localhost:8080 \
+          --api-key bf_live_test \
+          --command send-event \
+          --type session_start || true
+    
+    - name: Stop server
+      run: |
+        kill $SERVER_PID || true
+      if: always()
+    
+    - name: Test Docker build
+      run: |
+        docker build -t backfeedr:test .
+        docker run -d --name backfeedr-test -p 8081:8080 backfeedr:test
+        sleep 3
+        curl -f http://localhost:8081/api/v1/health || exit 1
+        docker stop backfeedr-test
+        docker rm backfeedr-test

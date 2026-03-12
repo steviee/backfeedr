@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+    
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Run unit tests
+      run: go test -v ./...
+    
+    - name: Build server
+      run: go build -o backfeedr ./cmd/backfeedr
+    
+    - name: Build client
+      run: go build -o backfeedr-client ./cmd/backfeedr-client
+    
+    - name: Run integration tests
+      run: |
+        # Start server in background
+        export BACKFEEDR_DB_PATH=/tmp/test.db
+        export BACKFEEDR_AUTH_TOKEN=test_token
+        export BACKFEEDR_PORT=8080
+        
+        ./backfeedr &
+        SERVER_PID=$!
+        
+        # Wait for server to start
+        sleep 2
+        
+        # Health check
+        ./backfeedr-client --endpoint http://localhost:8080 --command health
+        
+        # Create test app
+        # Note: This would need an admin endpoint or direct DB insert
+        # For now, we just verify the server responds
+        
+        # Stop server
+        kill $SERVER_PID
+    
+    - name: Run vet
+      run: go vet ./...
+    
+    - name: Check formatting
+      run: |
+        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+          echo "Please run 'gofmt -s -w .' to format your code"
+          gofmt -s -l .
+          exit 1
+        fi
