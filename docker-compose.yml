@@ -1,0 +1,13 @@
+services:
+  backfeedr:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+    environment:
+      - BACKFEEDR_AUTH_TOKEN=${BACKFEEDR_AUTH_TOKEN:-bf_admin_change_me}
+      - BACKFEEDR_BASE_URL=${BACKFEEDR_BASE_URL:-http://localhost:8080}
+      - BACKFEEDR_RETENTION_DAYS=90
+      - BACKFEEDR_DB_PATH=/data/backfeedr.db
+    restart: unless-stopped
