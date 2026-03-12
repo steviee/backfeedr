@@ -40,6 +40,7 @@ func New(cfg *config.Config, db *store.DB) *Server {
 
 	// Create handlers
 	crashHandler := api.NewCrashHandler(crashStore, appStore)
+	eventHandler := api.NewEventHandler(eventStore, appStore)
 
 	s := &Server{
 		cfg:        cfg,
@@ -63,8 +64,8 @@ func New(cfg *config.Config, db *store.DB) *Server {
 		r.Group(func(r chi.Router) {
 			r.Use(auth.APIKeyMiddleware(appStore))
 			r.Post("/crashes", crashHandler.HandleCrash)
-			r.Post("/events", s.handleEvent)
-			r.Post("/events/batch", s.handleBatch)
+			r.Post("/events", eventHandler.HandleEvent)
+			r.Post("/events/batch", eventHandler.HandleBatch)
 		})
 	})
 
@@ -110,16 +111,6 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
-}
-
-func (s *Server) handleEvent(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement event ingestion
-	w.WriteHeader(http.StatusCreated)
-}
-
-func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement batch ingestion
-	w.WriteHeader(http.StatusCreated)
 }
 
 func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
