@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -18,15 +19,22 @@ type Config struct {
 
 // Load reads configuration from environment variables
 func Load() *Config {
-	return &Config{
+	cfg := &Config{
 		Port:          getEnv("BACKFEEDR_PORT", "8080"),
-		DBPath:        getEnv("BACKFEEDR_DB_PATH", "/data/backfeedr.db"),
+		DBPath:        getEnv("BACKFEEDR_DB_PATH", "./data/backfeedr.db"),
 		AuthToken:     getEnv("BACKFEEDR_AUTH_TOKEN", generateToken()),
 		BaseURL:       getEnv("BACKFEEDR_BASE_URL", "http://localhost:8080"),
 		RetentionDays: getEnvInt("BACKFEEDR_RETENTION_DAYS", 90),
 		MaxBodySize:   getEnvInt64("BACKFEEDR_MAX_BODY_SIZE", 1*1024*1024), // 1MB
 		RateLimit:     getEnvInt("BACKFEEDR_RATE_LIMIT", 100),
 	}
+
+	// Ensure data directory exists
+	if dir := filepath.Dir(cfg.DBPath); dir != "." && dir != "/" {
+		os.MkdirAll(dir, 0755)
+	}
+
+	return cfg
 }
 
 func getEnv(key, defaultValue string) string {
