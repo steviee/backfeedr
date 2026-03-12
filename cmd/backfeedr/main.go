@@ -9,6 +9,7 @@ import (
 	"github.com/steviee/backfeedr/internal/config"
 	"github.com/steviee/backfeedr/internal/server"
 	"github.com/steviee/backfeedr/internal/store"
+	"github.com/steviee/backfeedr/internal/worker"
 )
 
 func main() {
@@ -23,6 +24,11 @@ func main() {
 	if err := store.Migrate(db); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
+
+	// Start background worker
+	metricsWorker := worker.NewMetricsWorker(db)
+	metricsWorker.Start()
+	defer metricsWorker.Stop()
 
 	srv := server.New(cfg, db)
 

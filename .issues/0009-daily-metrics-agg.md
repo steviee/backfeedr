@@ -1,7 +1,7 @@
 ---
 id: 9
 title: Daily metrics aggregation job
-status: open
+status: closed
 priority: medium
 labels: [db]
 created: 2026-03-12
