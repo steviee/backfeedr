@@ -4,6 +4,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+⚠️ **Early Development — Not Production Ready**
+
+This project is actively being developed. APIs may change, features are incomplete, and it's not yet ready for production use. Follow our [roadmap](#-roadmap) for progress.
+
 **One container. SQLite. Privacy-first. No vendor lock-in.**
 
 Built for indie developers who want control over their data. No Google, no Firebase, no cloud dependencies. Just a single Docker container and your own VPS.
