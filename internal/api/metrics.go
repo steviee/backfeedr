@@ -28,34 +28,45 @@ type DailyCrashes struct {
 	Data   []int    `json:"data"`
 }
 
+// CrashTypes represents crash type distribution
+type CrashTypes struct {
+	Labels []string `json:"labels"`
+	Data   []int    `json:"data"`
+}
+
+// DeviceDistribution represents crash distribution by device
+type DeviceDistribution struct {
+	Labels []string `json:"labels"`
+	Data   []int    `json:"data"`
+}
+
 // GetDailyCrashes returns crashes per day for the last 7 days
 func (h *MetricsHandler) GetDailyCrashes(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// Get last 7 days
-	days := 7
-	today := time.Now().UTC().Truncate(24 * time.Hour)
+	now := time.Now().UTC()
+	sevenDaysAgo := now.AddDate(0, 0, -7)
 
-	labels := make([]string, days)
-	data := make([]int, days)
+	// Get crashes in last 7 days
+	crashes, _ := h.crashStore.ListWithTimeRange(ctx, "", sevenDaysAgo, now, 1000)
 
-	for i := 0; i < days; i++ {
-		date := today.AddDate(0, 0, -days+i+1)
-		labels[i] = date.Format("Mon")
+	// Group by day
+	dayCount := make(map[string]int)
+	labels := []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
 
-		// Start/end of day
-		startOfDay := date
-		endOfDay := date.Add(24 * time.Hour)
+	for i := 0; i < 7; i++ {
+		day := sevenDaysAgo.AddDate(0, 0, i)
+		dayCount[day.Format("Mon")] = 0
+	}
 
-		// Count crashes in range
-		crashes, _ := h.crashStore.List(ctx, "", 1000)
-		count := 0
-		for _, c := range crashes {
-			if c.OccurredAt.After(startOfDay) && c.OccurredAt.Before(endOfDay) {
-				count++
-			}
-		}
-		data[i] = count
+	for _, c := range crashes {
+		day := c.OccurredAt.Format("Mon")
+		dayCount[day]++
+	}
+
+	data := make([]int, 7)
+	for i, label := range labels {
+		data[i] = dayCount[label]
 	}
 
 	result := DailyCrashes{
@@ -67,17 +78,15 @@ func (h *MetricsHandler) GetDailyCrashes(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(result)
 }
 
-// CrashTypes represents crash type distribution
-type CrashTypes struct {
-	Labels []string `json:"labels"`
-	Data   []int    `json:"data"`
-}
-
 // GetCrashTypes returns distribution by exception type
 func (h *MetricsHandler) GetCrashTypes(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	crashes, _ := h.crashStore.List(ctx, "", 1000)
+	// Get all crashes
+	crashes, _ := h.crashStore.ListWithTimeRange(ctx, "",
+		time.Now().AddDate(0, 0, -90), // Last 90 days
+		time.Now().UTC(),
+		1000)
 
 	typeCount := make(map[string]int)
 	for _, c := range crashes {
@@ -101,17 +110,15 @@ func (h *MetricsHandler) GetCrashTypes(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-// DeviceDistribution represents crash distribution by device
-type DeviceDistribution struct {
-	Labels []string `json:"labels"`
-	Data   []int    `json:"data"`
-}
-
 // GetDeviceDistribution returns crashes by device model
 func (h *MetricsHandler) GetDeviceDistribution(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	crashes, _ := h.crashStore.List(ctx, "", 1000)
+	// Get all crashes
+	crashes, _ := h.crashStore.ListWithTimeRange(ctx, "",
+		time.Now().AddDate(0, 0, -90),
+		time.Now().UTC(),
+		1000)
 
 	deviceCount := make(map[string]int)
 	for _, c := range crashes {

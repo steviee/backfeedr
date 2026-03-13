@@ -60,20 +60,39 @@ func (s *CrashStore) GetByID(ctx context.Context, id string) (*models.Crash, err
 	return s.scanCrash(row)
 }
 
-// List retrieves crashes with optional filtering
-func (s *CrashStore) List(ctx context.Context, appID string, limit int) ([]*models.Crash, error) {
-	query := `
-		SELECT id, app_id, group_hash, exception_type, exception_reason,
-			stack_trace, app_version, build_number, os_version, device_model,
-			locale, free_memory_mb, free_disk_mb, battery_level, is_charging,
-			occurred_at, received_at
-		FROM crashes WHERE app_id = ?
-		ORDER BY occurred_at DESC
-		LIMIT ?`
+// ListWithTimeRange retrieves crashes within a time range
+func (s *CrashStore) ListWithTimeRange(ctx context.Context, appID string, start, end time.Time, limit int) ([]*models.Crash, error) {
+	var query string
+	var args []interface{}
 
-	rows, err := s.db.QueryContext(ctx, query, appID, limit)
+	if appID == "" {
+		// Get all crashes (no app filter)
+		query = `
+			SELECT id, app_id, group_hash, exception_type, exception_reason,
+				stack_trace, app_version, build_number, os_version, device_model,
+				locale, free_memory_mb, free_disk_mb, battery_level, is_charging,
+				occurred_at, received_at
+			FROM crashes 
+			WHERE occurred_at >= ? AND occurred_at <= ?
+			ORDER BY occurred_at DESC
+			LIMIT ?`
+		args = []interface{}{start, end, limit}
+	} else {
+		query = `
+			SELECT id, app_id, group_hash, exception_type, exception_reason,
+				stack_trace, app_version, build_number, os_version, device_model,
+				locale, free_memory_mb, free_disk_mb, battery_level, is_charging,
+				occurred_at, received_at
+			FROM crashes 
+			WHERE app_id = ? AND occurred_at >= ? AND occurred_at <= ?
+			ORDER BY occurred_at DESC
+			LIMIT ?`
+		args = []interface{}{appID, start, end, limit}
+	}
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("query crashes: %w", err)
+		return nil, fmt.Errorf("query crashes with time range: %w", err)
 	}
 	defer rows.Close()
 
@@ -87,6 +106,62 @@ func (s *CrashStore) List(ctx context.Context, appID string, limit int) ([]*mode
 	}
 
 	return crashes, rows.Err()
+}
+
+// GetGroupsWithTimeRange returns crash groups within a time range
+func (s *CrashStore) GetGroupsWithTimeRange(ctx context.Context, appID string, start, end time.Time) ([]*models.CrashGroup, error) {
+	var query string
+	var args []interface{}
+
+	if appID == "" {
+		query = `
+			SELECT group_hash, exception_type, exception_reason,
+				COUNT(*) as count,
+				MIN(occurred_at) as first_seen,
+				MAX(occurred_at) as last_seen,
+				GROUP_CONCAT(DISTINCT app_version) as versions
+			FROM crashes
+			WHERE occurred_at >= ? AND occurred_at <= ?
+			GROUP BY group_hash
+			ORDER BY count DESC`
+		args = []interface{}{start, end}
+	} else {
+		query = `
+			SELECT group_hash, exception_type, exception_reason,
+				COUNT(*) as count,
+				MIN(occurred_at) as first_seen,
+				MAX(occurred_at) as last_seen,
+				GROUP_CONCAT(DISTINCT app_version) as versions
+			FROM crashes
+			WHERE app_id = ? AND occurred_at >= ? AND occurred_at <= ?
+			GROUP BY group_hash
+			ORDER BY count DESC`
+		args = []interface{}{appID, start, end}
+	}
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query crash groups with time range: %w", err)
+	}
+	defer rows.Close()
+
+	var groups []*models.CrashGroup
+	for rows.Next() {
+		var g models.CrashGroup
+		var versions string
+		err := rows.Scan(
+			&g.GroupHash, &g.ExceptionType, &g.ExceptionReason,
+			&g.Count, &g.FirstSeen, &g.LastSeen, &versions)
+		if err != nil {
+			return nil, fmt.Errorf("scan group: %w", err)
+		}
+		if versions != "" {
+			g.AffectedVersions = []string{versions}
+		}
+		groups = append(groups, &g)
+	}
+
+	return groups, rows.Err()
 }
 
 // GetGroups returns crash groups for an app

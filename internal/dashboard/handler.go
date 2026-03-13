@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/steviee/backfeedr/internal/models"
 	"github.com/steviee/backfeedr/internal/store"
@@ -39,30 +41,34 @@ func NewHandler(crashStore *store.CrashStore, appStore *store.AppStore, metricsS
 
 // Index handles the dashboard home page
 func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"Title":   "Dashboard",
-		"AppName": "backfeedr",
-	}
-
-	// Load real data
 	ctx := r.Context()
 
-	// Get total crashes
-	crashes, _ := h.crashStore.List(ctx, "", 100)
-	crashCount := len(crashes)
+	// Default: 7 days
+	days := 7
+	now := time.Now().UTC()
+	cutoff := now.AddDate(0, 0, -days)
+
+	// Get filtered crashes
+	crashes, _ := h.crashStore.ListWithTimeRange(ctx, "", cutoff, now, 100)
 
 	// Get apps
 	apps, _ := h.appStore.List(ctx)
 	appCount := len(apps)
 
-	// Get crash groups
-	groups, _ := h.crashStore.GetGroups(ctx, "")
+	// Get filtered groups
+	groups, _ := h.crashStore.GetGroupsWithTimeRange(ctx, "", cutoff, now)
 	groupCount := len(groups)
+
+	data := map[string]interface{}{
+		"Title":   "Dashboard",
+		"AppName": "backfeedr",
+		"Days":    days,
+	}
 
 	data["Stats"] = []StatCard{
 		{
-			Label: "Total Crashes",
-			Value: fmt.Sprintf("%d", crashCount),
+			Label: "Total Crashes (Last 7d)",
+			Value: fmt.Sprintf("%d", len(crashes)),
 			Class: "",
 		},
 		{
@@ -71,7 +77,7 @@ func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 			Class: "",
 		},
 		{
-			Label: "Crash Groups",
+			Label: "Crash Groups (Last 7d)",
 			Value: fmt.Sprintf("%d", groupCount),
 			Class: "",
 		},
@@ -98,14 +104,25 @@ type StatCard struct {
 func (h *Handler) CrashList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// Get crashes with groups
-	crashes, _ := h.crashStore.List(ctx, "", 100)
-	groups, _ := h.crashStore.GetGroups(ctx, "")
+	// Parse optional days filter
+	daysStr := r.URL.Query().Get("days")
+	days := 30 // Default: 30 days
+	if d, err := strconv.Atoi(daysStr); err == nil && d > 0 {
+		days = d
+	}
+
+	now := time.Now().UTC()
+	cutoff := now.AddDate(0, 0, -days)
+
+	// Get filtered crashes and groups
+	crashes, _ := h.crashStore.ListWithTimeRange(ctx, "", cutoff, now, 100)
+	groups, _ := h.crashStore.GetGroupsWithTimeRange(ctx, "", cutoff, now)
 
 	data := map[string]interface{}{
-		"Title":   "Crashes",
+		"Title":   fmt.Sprintf("Crashes (Last %d Days)", days),
 		"Crashes": crashes,
 		"Groups":  groups,
+		"Days":    days,
 	}
 
 	if err := h.templates.ExecuteTemplate(w, "layout", data); err != nil {
@@ -200,7 +217,7 @@ func (h *Handler) APIOverview(w http.ResponseWriter, r *http.Request) {
 	`, 98.5, 1234, 12456, 23)
 }
 
-// DashboardContent returns dashboard data for HTMX
+// DashboardContent returns dashboard data for HTMX with time filtering
 func (h *Handler) DashboardContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -211,12 +228,22 @@ func (h *Handler) DashboardContent(w http.ResponseWriter, r *http.Request) {
 		days = d
 	}
 
-	// Get all crashes (simplified from cutoff date)
-	allCrashes, _ := h.crashStore.List(ctx, "", 100)
+	// Calculate time range
+	now := time.Now().UTC()
+	cutoff := now.AddDate(0, 0, -days)
+
+	// Get filtered crashes
+	crashes, _ := h.crashStore.ListWithTimeRange(ctx, "", cutoff, now, 100)
+
+	// Get filtered groups
+	groups, _ := h.crashStore.GetGroupsWithTimeRange(ctx, "", cutoff, now)
 
 	data := map[string]interface{}{
-		"Days":    days,
-		"Crashes": allCrashes,
+		"Days":       days,
+		"Crashes":    crashes,
+		"Groups":     groups,
+		"CrashCount": len(crashes),
+		"GroupCount": len(groups),
 	}
 
 	w.Header().Set("Content-Type", "text/html")

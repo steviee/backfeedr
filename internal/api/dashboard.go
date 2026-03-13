@@ -43,20 +43,15 @@ type CrashGroupStats struct {
 func (h *DashboardHandler) GetOverview(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	enow := time.Now().UTC()
-	sevenDaysAgo := enow.AddDate(0, 0, -7)
+	now := time.Now().UTC()
+	sevenDaysAgo := now.AddDate(0, 0, -7)
 
-	// Get total crashes in last 7 days
-	crashes, _ := h.crashStore.List(ctx, "", 1000) // Get all crashes
-	crashCount := 0
-	for _, c := range crashes {
-		if c.OccurredAt.After(sevenDaysAgo) {
-			crashCount++
-		}
-	}
+	// Get crashes in last 7 days
+	crashes, _ := h.crashStore.ListWithTimeRange(ctx, "", sevenDaysAgo, now, 1000)
+	crashCount := len(crashes)
 
-	// Get crash groups
-	groups, err := h.crashStore.GetGroups(ctx, "")
+	// Get crash groups in last 7 days
+	groups, err := h.crashStore.GetGroupsWithTimeRange(ctx, "", sevenDaysAgo, now)
 	topCrashes := make([]CrashGroupStats, 0)
 	if err == nil && len(groups) > 0 {
 		for i, g := range groups {
@@ -75,8 +70,6 @@ func (h *DashboardHandler) GetOverview(w http.ResponseWriter, r *http.Request) {
 	// Calculate crash-free rate (placeholder - needs events data)
 	crashFreeRate := 100.0
 	if crashCount > 0 {
-		// If we have events, calculate actual rate
-		// For now, use a reasonable estimate
 		crashFreeRate = 98.0
 	}
 
