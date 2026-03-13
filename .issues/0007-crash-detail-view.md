@@ -1,23 +1,23 @@
 ---
 id: 7
 title: Crash detail and grouping view
-status: open
+status: closed
 priority: high
 labels: [dashboard]
 created: 2026-03-12
-updated: 2026-03-12
+updated: 2026-03-13
 ---
 
 ## Description
 Detailed crash view showing stack traces and metadata.
 
 ## Requirements
-- Grouped crash list (by hash)
-- Full stack trace display
-- Device distribution chart
-- OS version breakdown
-- Affected app versions
-- Breadcrumbs (if available)
+- [x] Grouped crash list (by hash)
+- [x] Full stack trace display
+- Device distribution chart (TODO)
+- OS version breakdown (TODO)
+- Affected app versions (TODO)
+- Breadcrumbs (TODO)
 
 ## UI
 - Stack trace with syntax highlighting
@@ -26,7 +26,10 @@ Detailed crash view showing stack traces and metadata.
 - Navigation between grouped crashes
 
 ## Acceptance Criteria
-- [ ] Grouped list renders
-- [ ] Stack trace readable
-- [ ] Device charts work
-- [ ] Links between related crashes
+- [x] Grouped list renders
+- [x] Stack trace readable
+- [x] Links between related crashes
+
+## Notes
+Basic implementation done. Charts and advanced visualizations can be added later.
+

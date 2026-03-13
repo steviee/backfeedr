@@ -12,7 +12,45 @@
     {{end}}
 </div>
 
-<!-- Crash List -->
+<!-- Charts -->
+<div class="grid">
+    <article>
+        <header><h3>Crashes (Last 7 Days)</h3></header>
+        <div style="height: 200px;">
+            <canvas id="dailyCrashesChart"></canvas>
+        </div>
+    </article>
+    
+    <article>
+        <header><h3>By Crash Type</h3></header>
+        <div style="height: 200px;">
+            <canvas id="crashTypesChart"></canvas>
+        </div>
+    </article>
+</div>
+
+<div class="grid">
+    <article>
+        <header><h3>By Device</h3></header>
+        <div style="height: 200px;">
+            <canvas id="deviceChart"></canvas>
+        </div>
+    </article>
+    
+    <article>
+        <header><h3>Quick Actions</h3></header>
+        <details>
+            <summary>View All Crashes</summary>
+            <p><a href="/crashes" role="button">Go to Crash List →</a></p>
+        </details>
+        <details>
+            <summary>Manage Apps</summary>
+            <p><a href="/apps" role="button">Go to Apps →</a></p>
+        </details>
+    </article>
+</div>
+
+<!-- Recent Crashes -->
 <section>
     <h2>Recent Crashes</h2>
     {{if .Crashes}}
@@ -40,36 +78,102 @@
     <p>No crashes recorded yet. Send some data from your app!</p>
     {{end}}
 </section>
-
-<!-- Crash Groups -->
-{{if .Groups}}
-<section>
-    <h2>Crash Groups</h2>
-    <table role="grid">
-        <thead>
-            <tr>
-                <th>Exception Type</th>
-                <th>Count</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{range .Groups}}
-            <tr>
-                <td><code>{{.ExceptionType}}</code></td>
-                <td>{{.Count}}</td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
-</section>
-{{end}}
 {{end}}
 
 {{define "scripts"}}
 <script>
-    // Auto-refresh every 30 seconds
+    // Load chart data from API
+    async function loadCharts() {
+        try {
+            // Daily crashes
+            const dailyResponse = await fetch('/api/v1/metrics/daily-crashes');
+            const dailyData = await dailyResponse.json();
+            
+            new Chart(document.getElementById('dailyCrashesChart'), {
+                type: 'line',
+                data: {
+                    labels: dailyData.labels,
+                    datasets: [{
+                        label: 'Crashes',
+                        data: dailyData.data,
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+            
+            // Crash types
+            const typesResponse = await fetch('/api/v1/metrics/crash-types');
+            const typesData = await typesResponse.json();
+            
+            new Chart(document.getElementById('crashTypesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: typesData.labels,
+                    datasets: [{
+                        data: typesData.data,
+                        backgroundColor: [
+                            'rgb(239, 68, 68)',
+                            'rgb(245, 158, 11)',
+                            'rgb(16, 185, 129)',
+                            'rgb(59, 130, 246)',
+                            'rgb(139, 92, 246)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+            
+            // Device distribution
+            const deviceResponse = await fetch('/api/v1/metrics/devices');
+            const deviceData = await deviceResponse.json();
+            
+            new Chart(document.getElementById('deviceChart'), {
+                type: 'bar',
+                data: {
+                    labels: deviceData.labels,
+                    datasets: [{
+                        label: 'Crashes',
+                        data: deviceData.data,
+                        backgroundColor: 'rgb(59, 130, 246)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { ticks: { autoSkip: false, maxRotation: 45 } }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Failed to load charts:', error);
+        }
+    }
+    
+    // Load charts on page load
+    document.addEventListener('DOMContentLoaded', loadCharts);
+    
+    // Auto-refresh every 60 seconds
     setTimeout(function() {
         window.location.reload();
-    }, 30000);
+    }, 60000);
 </script>
 {{end}}
