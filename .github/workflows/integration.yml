@@ -21,47 +21,15 @@ jobs:
       with:
         go-version: '1.22'
     
-    - name: Build server and client
+    - name: Install system dependencies
       run: |
-        go build -o backfeedr ./cmd/backfeedr
-        go build -o backfeedr-client ./cmd/backfeedr-client
+        sudo apt-get update
+        sudo apt-get install -y sqlite3 curl
     
-    - name: Start server
+    - name: Run integration tests
       run: |
-        export BACKFEEDR_DB_PATH=/tmp/test.db
-        export BACKFEEDR_AUTH_TOKEN=test_token
-        export BACKFEEDR_PORT=8080
-        
-        ./backfeedr &
-        echo "SERVER_PID=$!" >> $GITHUB_ENV
-        
-        # Wait for server
-        sleep 2
-    
-    - name: Test health endpoint
-      run: |
-        ./backfeedr-client --endpoint http://localhost:8080 --command health
-    
-    - name: Test API with client
-      run: |
-        # Create a test app directly in DB (we'll need this for full tests)
-        # For now, just verify the API responds with 401 for missing auth
-        
-        # Test with example payloads (will fail auth, but tests parsing)
-        ./backfeedr-client --endpoint http://localhost:8080 \
-          --api-key bf_live_test \
-          --command send-crash \
-          --file examples/crash.json || true
-        
-        ./backfeedr-client --endpoint http://localhost:8080 \
-          --api-key bf_live_test \
-          --command send-event \
-          --type session_start || true
-    
-    - name: Stop server
-      run: |
-        kill $SERVER_PID || true
-      if: always()
+        chmod +x ./test/integration.sh
+        ./test/integration.sh
     
     - name: Test Docker build
       run: |
