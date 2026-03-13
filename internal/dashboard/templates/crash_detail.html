@@ -1,0 +1,59 @@
+{{template "layout" .}}
+
+{{define "title"}}Crash Detail{{end}}
+
+{{define "content"}}
+<div class="grid">
+    <div>
+        <h2>
+            {{.Crash.ExceptionType}}
+            {{if .Crash.ExceptionReason}}
+            <small>{{.Crash.ExceptionReason}}</small>
+            {{end}}
+        </h2>
+        
+        <article>
+            <header>
+                <h3>Stack Trace</h3>
+            </header>
+            <pre><code class="language-swift">
+{{range .Crash.StackTrace}}
+{{.Frame}}: {{.Symbol}}
+{{if .File}}    {{.File}}:{{.Line}}{{end}}
+{{end}}
+            </code></pre>
+        </article>
+        
+        <article>
+            <header>
+                <h3>Breadcrumbs</h3>
+            </header>
+            <p><em>No breadcrumbs available for this crash.</em></p>
+        </article>
+    </div>
+    
+    <div>
+        <article>
+            <header>
+                <h3>Details</h3>
+            </header>
+            <table>
+                <tbody>
+                    <tr><td><strong>ID</strong></td><td><code>{{.Crash.ID}}</code></td></tr>
+                    <tr><td><strong>Group</strong></td><td><code>{{.Crash.GroupHash}}</code></td></tr>
+                    <tr><td><strong>Time</strong></td><td>{{.Crash.OccurredAt.Format "2006-01-02 15:04:05 UTC"}}</td></tr>
+                    <tr><td><strong>App Version</strong></td><td>{{.Crash.AppVersion}}</td></tr>
+                    <tr><td><strong>Build</strong></td><td>{{.Crash.BuildNumber}}</td></tr>
+                    <tr><td><strong>OS Version</strong></td><td>{{.Crash.OSVersion}}</td></tr>
+                    <tr><td><strong>Device</strong></td><td>{{.Crash.DeviceModel}}</td></tr>
+                    <tr><td><strong>Locale</strong></td><td>{{.Crash.Locale}}</td></tr>
+                    <tr><td><strong>Memory</strong></td><td>{{.Crash.FreeMemoryMB}} MB free</td></tr>
+                    <tr><td><strong>Battery</strong></td><td>{{printf "%.0f" .Crash.BatteryLevel}}% {{if .Crash.IsCharging}}(charging){{end}}</td></tr>
+                </tbody>
+            </table>
+        </article>
+    </div>
+</div>
+
+<a href="/crashes" role="button" class="secondary">← Back to Crashes</a>
+{{end}}

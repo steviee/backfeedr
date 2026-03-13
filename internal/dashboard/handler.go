@@ -96,8 +96,16 @@ type StatCard struct {
 
 // CrashList handles the crash list page
 func (h *Handler) CrashList(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Get crashes with groups
+	crashes, _ := h.crashStore.List(ctx, "", 100)
+	groups, _ := h.crashStore.GetGroups(ctx, "")
+
 	data := map[string]interface{}{
-		"Title": "Crashes",
+		"Title":   "Crashes",
+		"Crashes": crashes,
+		"Groups":  groups,
 	}
 
 	if err := h.templates.ExecuteTemplate(w, "layout", data); err != nil {
@@ -107,11 +115,27 @@ func (h *Handler) CrashList(w http.ResponseWriter, r *http.Request) {
 
 // CrashDetail handles individual crash pages
 func (h *Handler) CrashDetail(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"Title": "Crash Detail",
+	ctx := r.Context()
+
+	// Get crash ID from URL
+	crashID := r.URL.Path[len("/crashes/"):]
+	if crashID == "" {
+		http.Error(w, "Missing crash ID", http.StatusBadRequest)
+		return
 	}
 
-	if err := h.templates.ExecuteTemplate(w, "layout", data); err != nil {
+	crash, err := h.crashStore.GetByID(ctx, crashID)
+	if err != nil || crash == nil {
+		http.Error(w, "Crash not found", http.StatusNotFound)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Title": "Crash Detail",
+		"Crash": crash,
+	}
+
+	if err := h.templates.ExecuteTemplate(w, "crash_detail", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

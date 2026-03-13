@@ -1,0 +1,67 @@
+{{template "layout" .}}
+
+{{define "title"}}Crashes{{end}}
+
+{{define "content"}}
+<h2>Crashes</h2>
+
+{{if .Groups}}
+<section>
+    <h3>By Group</h3>
+    <table role="grid">
+        <thead>
+            <tr>
+                <th>Exception</th>
+                <th>Reason</th>
+                <th>Count</th>
+                <th>Last Seen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Groups}}
+            <tr>
+                <td><code>{{.ExceptionType}}</code></td>
+                <td>{{.ExceptionReason}}</td>
+                <td>{{.Count}}</td>
+                <td>{{.LastSeen.Format "2006-01-02"}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</section>
+{{end}}
+
+{{if .Crashes}}
+<section>
+    <h3>All Crashes</h3>
+    <table role="grid">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>App Version</th>
+                <th>Device</th>
+                <th>Time</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Crashes}}
+            <tr>
+                <td><code>{{.ExceptionType}}</code></td>
+                <td>{{.AppVersion}}</td>
+                <td>{{.DeviceModel}}</td>
+                <td>{{.OccurredAt.Format "2006-01-02 15:04"}}</td>
+                <td>
+                    <a href="/crashes/{{.ID}}" role="button" class="secondary">View</a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</section>
+{{else}}
+<p>No crashes recorded yet.</p>
+{{end}}
+
+<a href="/" role="button" class="secondary">← Back to Dashboard</a>
+{{end}}
