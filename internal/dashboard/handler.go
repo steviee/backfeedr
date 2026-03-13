@@ -199,3 +199,28 @@ func (h *Handler) APIOverview(w http.ResponseWriter, r *http.Request) {
 		</div>
 	`, 98.5, 1234, 12456, 23)
 }
+
+// DashboardContent returns dashboard data for HTMX
+func (h *Handler) DashboardContent(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Parse days parameter
+	daysStr := r.URL.Query().Get("days")
+	days := 7
+	if d, err := strconv.Atoi(daysStr); err == nil && d > 0 {
+		days = d
+	}
+
+	// Get all crashes (simplified from cutoff date)
+	allCrashes, _ := h.crashStore.List(ctx, "", 100)
+
+	data := map[string]interface{}{
+		"Days":    days,
+		"Crashes": allCrashes,
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	if err := h.templates.ExecuteTemplate(w, "dashboard_content", data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

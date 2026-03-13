@@ -82,6 +82,7 @@ func New(cfg *config.Config, db *store.DB) *Server {
 
 	// Dashboard routes
 	r.Get("/", dashHandler.Index)
+	r.Get("/api/dashboard", dashHandler.DashboardContent)
 	r.Get("/crashes", dashHandler.CrashList)
 	r.Get("/crashes/{id}", dashHandler.CrashDetail)
 	r.Get("/apps", dashHandler.AppList)

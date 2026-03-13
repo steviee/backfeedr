@@ -3,7 +3,18 @@
 {{define "title"}}Dashboard{{end}}
 
 {{define "content"}}
-<div class="stats-grid">
+<!-- Time Filter -->
+<section>
+    <h2>Time Range</h2>
+    <div class="grid" style="--grid-cols: 4;">
+        <button class="secondary" hx-get="/api/dashboard?days=1" hx-target="#dashboard-content">Last 24h</button>
+        <button class="secondary" hx-get="/api/dashboard?days=7" hx-target="#dashboard-content">Last 7 Days</button>
+        <button class="secondary" hx-get="/api/dashboard?days=30" hx-target="#dashboard-content">Last 30 Days</button>
+        <button class="secondary" hx-get="/api/dashboard?days=90" hx-target="#dashboard-content">Last 90 Days</button>
+    </div>
+</section>
+
+<div id="dashboard-content">
     {{range .Stats}}
     <article class="stat-card">
         <div class="stat-label">{{.Label}}</div>
