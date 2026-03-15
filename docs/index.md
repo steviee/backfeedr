@@ -23,7 +23,7 @@ Monitor your app's health with a beautiful web dashboard:
 
 When a crash happens, you get comprehensive information:
 
-![Crash Detail](images/crash-detail.png)
+![Crash Detail](images/crash-detail-ios.png)
 *Full stack trace with file names, line numbers, and device context*
 
 **Each crash report includes:**
