@@ -2,6 +2,9 @@
 
 The backfeedr dashboard provides a web-based interface for monitoring your app's crashes and metrics.
 
+![Dashboard Overview](images/dashboard-overview.png)
+*Dashboard showing crash statistics, charts, and recent crashes*
+
 ## Accessing the Dashboard
 
 Once your server is running, open your browser:
@@ -58,6 +61,9 @@ Shows which device models are most affected:
 
 ## Crash List
 
+![Crashes List](images/crashes-list.png)
+*List of all crashes with grouping by exception type*
+
 ### Recent Crashes Table
 
 Lists individual crash reports with:
@@ -74,6 +80,9 @@ Shows aggregated crash data:
 - Helps identify most common crashes
 
 ## Crash Detail View
+
+![Crash Detail](images/crash-detail.png)
+*Detailed view of a single crash with stack trace and device information*
 
 Click "View" on any crash to see detailed information:
 
