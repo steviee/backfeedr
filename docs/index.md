@@ -2,6 +2,64 @@
 
 > Self-hosted crash reporting & app metrics for iOS indie developers
 
+## What You Get
+
+After setting up backfeedr, you'll have a **complete crash reporting system** running on your own infrastructure:
+
+### 📊 Real-Time Dashboard
+
+Monitor your app's health with a beautiful web dashboard:
+
+![Dashboard Overview](images/dashboard-overview.png)
+*Live dashboard showing crash statistics, trends, and recent reports*
+
+**Features:**
+- **Live Metrics** - See crash counts, active users, and trends at a glance
+- **Interactive Charts** - Visualize crash patterns over time
+- **Time Filtering** - Filter by last 24h, 7 days, 30 days, or 90 days
+- **Device Analytics** - See which devices are most affected
+
+### 🔍 Detailed Crash Reports
+
+When a crash happens, you get comprehensive information:
+
+![Crash Detail](images/crash-detail.png)
+*Full stack trace with file names, line numbers, and device context*
+
+**Each crash report includes:**
+- Complete stack trace with symbolication
+- Device model and iOS version
+- App version and build number
+- Memory and battery status at crash time
+- Locale and timezone
+- Grouped by exception type for easy triage
+
+### 📱 iOS SDK Integration
+
+Simple Swift integration with automatic crash detection:
+
+```swift
+import BackfeedrKit
+
+// One-time setup
+Backfeedr.configure(
+    endpoint: "https://crashes.yourserver.com",
+    apiKey: "bf_live_your_key"
+)
+
+// That's it! Crashes are automatically reported
+```
+
+**SDK Features:**
+- ✅ Automatic crash detection
+- ✅ Manual error reporting
+- ✅ Event tracking (sessions, custom events)
+- ✅ Offline queue (crashes stored when offline)
+- ✅ PII scrubbing (removes personal data)
+- ✅ Lightweight (< 1MB impact)
+
+---
+
 ## Quick Links
 
 - [Getting Started](getting-started.md) - Installation & Setup
@@ -11,41 +69,35 @@
 - [Deployment](deployment.md) - Production deployment
 - [Contributing](../CONTRIBUTING.md) - How to contribute
 
-## What is backfeedr?
+## Why backfeedr?
 
-backfeedr is a **self-hosted crash reporting and analytics platform** designed specifically for iOS indie developers who want:
+| Feature | Firebase Crashlytics | Sentry Self-Hosted | **backfeedr** |
+|---------|---------------------|-------------------|---------------|
+| Setup | SDK + Google account | 10+ services, complex | **1 Docker container** |
+| Data Ownership | Google owns your data | You own it | **You own it** |
+| Privacy | Data shared with Google | Your data stays private | **Privacy-first, no third parties** |
+| Cost | Free (but you're the product) | OSS but infrastructure costs | **Forever free, open source** |
+| iOS Native | Generic, not Swift-optimized | Generic | **Built for Swift developers** |
+| Resource Usage | N/A (cloud) | 4GB+ RAM | **256MB RAM** |
 
-- ✅ **Full data ownership** - Your data stays on your server
-- ✅ **Privacy-first** - No third-party tracking, no data sharing
-- ✅ **Simple setup** - Single Docker container, SQLite database
-- ✅ **iOS-native** - Built with Swift developers in mind
-- ✅ **Forever free** - Open source, no usage limits
+## Quick Start
 
-## Features
+```bash
+# Clone the repository
+git clone https://github.com/steviee/backfeedr.git
+cd backfeedr
 
-### Backend
-- **Crash Reporting** - Automatic crash detection with stack traces
-- **Event Tracking** - Custom events, sessions, user flows
-- **Real-time Dashboard** - Live metrics and visualizations
-- **Data Retention** - Automatic cleanup after 90 days
-- **API Authentication** - API keys with optional HMAC signing
-- **Rate Limiting** - 100 requests/minute per key
+# Start with Docker (recommended)
+mkdir data
+docker-compose up -d
 
-### Dashboard
-- **Crash Overview** - See all crashes at a glance
-- **Crash Detail View** - Full stack traces with device info
-- **Time Filtering** - Filter by 24h, 7d, 30d, 90d
-- **Interactive Charts** - Line, doughnut, and bar charts
-- **Crash Grouping** - Automatic grouping by exception type
-- **Device Analytics** - See which devices are affected
+# Or build from source
+make build
+./backfeedr
 
-### iOS SDK (Swift)
-- **Automatic Crash Detection** - Catches uncaught exceptions
-- **Manual Error Reporting** - Report non-fatal errors
-- **Event Tracking** - Track user actions and sessions
-- **Offline Queue** - Stores crashes when offline
-- **PII Scrubbing** - Removes personal data before sending
-- **Lightweight** - Minimal impact on app performance
+# Visit your dashboard
+open http://localhost:8080
+```
 
 ## Architecture
 
@@ -58,26 +110,13 @@ backfeedr is a **self-hosted crash reporting and analytics platform** designed s
 ┌─────────────┐     HTTP            │  • HTMX UI      │
 │   Browser   │ ──────────────────> │  • REST API     │
 │  (Dashboard)│                     └─────────────────┘
-└─────────────┘
-```
-
-## Quick Start
-
-```bash
-# Clone the repository
-git clone https://github.com/steviee/backfeedr.git
-cd backfeedr
-
-# Start with Docker
-mkdir data
-docker-compose up -d
-
-# Or build from source
-make build
-./backfeedr
-
-# Visit dashboard
-open http://localhost:8080
+└─────────────┘                            │
+                                           │
+                                    ┌──────┴──────┐
+                                    │   Your VPS   │
+                                    │  (You own    │
+                                    │   the data)  │
+                                    └──────────────┘
 ```
 
 ## Project Status
