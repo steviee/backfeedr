@@ -40,6 +40,18 @@ make build
 
 Visit `http://localhost:8080` to see your dashboard.
 
+## 📚 Documentation
+
+Full documentation is available at [GitHub Pages](https://steviee.github.io/backfeedr/):
+
+- [Getting Started](https://steviee.github.io/backfeedr/getting-started) - Installation & setup
+- [Dashboard Guide](https://steviee.github.io/backfeedr/dashboard) - Using the web dashboard
+- [iOS SDK](https://steviee.github.io/backfeedr/ios-sdk) - Swift SDK documentation
+- [API Reference](https://steviee.github.io/backfeedr/API) - Complete API documentation
+- [Deployment](https://steviee.github.io/backfeedr/deployment) - Production deployment
+
+Or browse locally in the [`docs/`](docs/) directory.
+
 ## 📱 iOS Integration
 
 ```swift
