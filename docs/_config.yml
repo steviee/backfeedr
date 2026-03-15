@@ -1,0 +1,38 @@
+# GitHub Pages Configuration
+title: backfeedr
+description: Self-hosted crash reporting & app metrics for iOS indie developers
+baseurl: "/backfeedr"
+url: "https://steviee.github.io"
+
+# Theme settings
+theme: jekyll-theme-cayman
+
+# Navigation
+nav:
+  - title: Getting Started
+    url: /getting-started
+  - title: Dashboard
+    url: /dashboard
+  - title: iOS SDK
+    url: /ios-sdk
+  - title: API Reference
+    url: /API
+  - title: Deployment
+    url: /deployment
+
+# Exclude files
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# Plugins
+plugins:
+  - jekyll-relative-links
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
